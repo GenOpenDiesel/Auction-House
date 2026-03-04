@@ -11,8 +11,7 @@ import me.elaineqheart.auctionHouse.data.ram.AhConfiguration;
 import me.elaineqheart.auctionHouse.data.ram.AuctionHouseStorage;
 import me.elaineqheart.auctionHouse.data.ram.ItemManager;
 import me.elaineqheart.auctionHouse.data.ram.ItemNote;
-import me.elaineqheart.auctionHouse.vault.VaultHook;
-import net.milkbowl.vault.economy.Economy;
+import me.elaineqheart.auctionHouse.vault.EcoManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -106,8 +105,7 @@ public class CollectSoldItemGUI extends InventoryGUI {
         ItemNote note = AuctionHouseStorage.getNote(noteID);
         if(note == null) return false;
         if(note.isBIDAuction() && note.isSold()) return false;
-        Economy eco = VaultHook.getEconomy();
-        eco.depositPlayer(p, getProfit(price));
+        EcoManager.deposit(p, getProfit(price));
         if (note.getPartiallySoldAmountLeft() != 0) {
             ItemNoteStorage.setPrice(note, note.getPrice() - price);
             ItemStack temp = note.getItem().clone();
