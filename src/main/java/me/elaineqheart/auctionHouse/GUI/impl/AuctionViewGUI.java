@@ -14,7 +14,7 @@ import me.elaineqheart.auctionHouse.data.ram.AhConfiguration;
 import me.elaineqheart.auctionHouse.data.ram.Bid;
 import me.elaineqheart.auctionHouse.data.ram.ItemManager;
 import me.elaineqheart.auctionHouse.data.ram.ItemNote;
-import me.elaineqheart.auctionHouse.vault.VaultHook;
+import me.elaineqheart.auctionHouse.vault.EcoManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -100,7 +100,7 @@ public class AuctionViewGUI extends InventoryGUI implements Runnable{
             this.addButton(29, submitBid());
             return;
         }
-        if(VaultHook.getEconomy().getBalance(player) < increase) {
+        if(EcoManager.getBalance(player) < increase) {
             this.addButton(29, cannotAffordBid());
         }else{
             this.addButton(29, submitBid());
@@ -110,7 +110,7 @@ public class AuctionViewGUI extends InventoryGUI implements Runnable{
 
     private void decorateBIN(Player player) {
         int slot = SettingManager.partialSelling && note.getCurrentAmount() > 1 ? 30 : 31;
-        if(VaultHook.getEconomy().getBalance(player) < note.getPrice()) {
+        if(EcoManager.getBalance(player) < note.getPrice()) {
             this.addButton(slot,armadilloScute());
         }else{
             this.addButton(slot,turtleScute());
@@ -195,7 +195,7 @@ public class AuctionViewGUI extends InventoryGUI implements Runnable{
                             try {
                                 int amount = Integer.parseInt(typedText);
                                 if (amount <= 0 || amount > note.getCurrentAmount()) throw new RuntimeException();
-                                if (note.getPrice() / note.getItem().getAmount() * amount > VaultHook.getEconomy().getBalance(p)) {
+                                if (note.getPrice() / note.getItem().getAmount() * amount > EcoManager.getBalance(p)) {
                                     AuctionHouse.getGuiManager().openGUI(new AuctionViewGUI(note, c, 0, goBackTo), p);
                                     p.sendMessage(M.getFormatted("chat.not-enough-money"));
                                     Sounds.villagerDeny(event);
@@ -238,7 +238,7 @@ public class AuctionViewGUI extends InventoryGUI implements Runnable{
                                 AuctionHouse.getGuiManager().openGUI(new AuctionViewGUI(note, c, 0, goBackTo), p);
                                 return;
                             }
-                            if (amount > VaultHook.getEconomy().getBalance(p)) {
+                            if (amount > EcoManager.getBalance(p)) {
                                 p.sendMessage(M.getFormatted("chat.not-enough-money"));
                                 Sounds.villagerDeny(event);
                                 AuctionHouse.getGuiManager().openGUI(new AuctionViewGUI(note, c, 0, goBackTo), p);
