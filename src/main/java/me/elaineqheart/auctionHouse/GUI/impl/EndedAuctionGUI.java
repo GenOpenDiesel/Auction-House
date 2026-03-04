@@ -12,8 +12,7 @@ import me.elaineqheart.auctionHouse.data.ram.AhConfiguration;
 import me.elaineqheart.auctionHouse.data.ram.AuctionHouseStorage;
 import me.elaineqheart.auctionHouse.data.ram.ItemManager;
 import me.elaineqheart.auctionHouse.data.ram.ItemNote;
-import me.elaineqheart.auctionHouse.vault.VaultHook;
-import net.milkbowl.vault.economy.Economy;
+import me.elaineqheart.auctionHouse.vault.EcoManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -170,8 +169,7 @@ public class EndedAuctionGUI extends InventoryGUI implements Runnable{
                         Sounds.villagerDeny(event);
                         return;
                     }
-                    Economy eco = VaultHook.getEconomy();
-                    eco.depositPlayer(p, price);
+                    EcoManager.deposit(p, price);
                     p.sendMessage(M.getFormatted("chat.collect-coins", price,
                             "%item%", note.getItemName()));
                     Sounds.experience(event);
