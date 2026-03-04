@@ -7,10 +7,9 @@ import me.elaineqheart.auctionHouse.GUI.other.Sounds;
 import me.elaineqheart.auctionHouse.data.persistentStorage.ItemNoteStorage;
 import me.elaineqheart.auctionHouse.data.persistentStorage.local.configs.M;
 import me.elaineqheart.auctionHouse.data.ram.*;
-import me.elaineqheart.auctionHouse.vault.VaultHook;
+import me.elaineqheart.auctionHouse.vault.EcoManager;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -99,13 +98,12 @@ public class ConfirmBidGUI extends InventoryGUI {
                         return;
                     }
                     double increase = price - note.getBid(p);
-                    Economy eco = VaultHook.getEconomy();
-                    if (eco.getBalance(p) < increase) { //extra check to make sure that they have enough coins
+                    if (EcoManager.getBalance(p) < increase) { //extra check to make sure that they have enough coins
                         p.sendMessage(M.getFormatted("chat.not-enough-money"));
                         Sounds.villagerDeny(event);
                         return;
                     }
-                    eco.withdrawPlayer(p, increase);
+                    EcoManager.withdraw(p, increase);
                     Sounds.experience(event);
                     ItemNoteStorage.addBid(note, p, price);
                     try {
