@@ -27,7 +27,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew shadowJar
 
-- name: Upload Plugin JAR
+    - name: Upload Plugin JAR
       uses: actions/upload-artifact@v4
       with:
         name: AuctionHouse
