@@ -15,6 +15,7 @@ import me.elaineqheart.auctionHouse.data.persistentStorage.local.data.ConfigMana
 import me.elaineqheart.auctionHouse.data.ram.AhConfiguration;
 import me.elaineqheart.auctionHouse.data.ram.AuctionHouseStorage;
 import me.elaineqheart.auctionHouse.data.ram.ItemNote;
+import me.elaineqheart.auctionHouse.vault.EcoManager;
 import me.elaineqheart.auctionHouse.world.displays.CreateDisplay;
 import me.elaineqheart.auctionHouse.world.displays.UpdateDisplay;
 import me.elaineqheart.auctionHouse.world.npc.NPCManager;
@@ -35,10 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
-// https://github.com/VelixDevelopments/Imperat
-
-// #don't try to fix what's not broken
 
 public class AuctionHouseCommand implements CommandExecutor, TabCompleter {
     @Override
@@ -65,8 +62,6 @@ public class AuctionHouseCommand implements CommandExecutor, TabCompleter {
                 p.sendMessage("§6> §7Contact:§e§n https://discord.gg/ePTwfDK6AY");
                 p.sendMessage("§6> §e§nhttps://www.spigotmc.org/threads/auction-house.690682/");
                 p.sendMessage("§6>");
-                //p.sendMessage("§6> §7You are told to be patient - so the thief has time to flee");
-                //p.sendMessage("§6> §7The proletarians have nothing to lose but their chains");
                 p.sendMessage("§6> §7§l---------------[ §dAuction House§7§l ]---------------");
             }
             if(strings.length==1 && strings[0].equals(M.getFormatted("commands.help"))) {
@@ -140,7 +135,6 @@ public class AuctionHouseCommand implements CommandExecutor, TabCompleter {
                 item.setAmount(item.getAmount() - amount);
                 p.sendMessage(M.getFormatted("command-feedback.auction", price));
                 
-                // Announce the new auction to all players who have announcements enabled
                 if(SettingManager.auctionAnnouncementsEnabled) {
                     String itemName = StringUtils.getItemName(inputItem);
                     String announcement = M.getFormatted("chat.auction-announcement", price,
@@ -157,7 +151,6 @@ public class AuctionHouseCommand implements CommandExecutor, TabCompleter {
                 }
 
             }
-            // /ah announce - toggle announcements
             if(strings.length == 1 && SettingManager.auctionAnnouncementsEnabled && strings[0].equals(M.getFormatted("commands.announce"))) {
                 boolean newState = ConfigManager.playerPreferences.toggleAnnouncements(p);
                 if(newState) {
@@ -183,15 +176,24 @@ public class AuctionHouseCommand implements CommandExecutor, TabCompleter {
                     AuctionHouse.getGuiManager().openGUI(new CollectSoldItemGUI(note, configuration), p);
                 }
             }
-            // /ah admin
             if(p.hasPermission(SettingManager.permissionModerate) && strings.length > 0) {
                 if(strings.length == 1 && strings[0].equals(M.getFormatted("commands.admin"))) {
                     AuctionHouse.getGuiManager().openGUI(new AuctionHouseGUI(0, AuctionHouseGUI.Sort.HIGHEST_PRICE, "", p, true), p);
+                } else if (strings[0].equals("zapiszwalute") || strings[0].equals("zapiszitemekah")) {
+                    ItemStack item = p.getInventory().getItemInMainHand();
+                    if(item == null || item.getType() == org.bukkit.Material.AIR) {
+                        p.sendMessage("§cMusisz trzymac fizyczny przedmiot w rece!");
+                        return true;
+                    }
+                    ItemStack currency = item.clone();
+                    currency.setAmount(1);
+                    EcoManager.setCurrencyItem(currency);
+                    p.sendMessage("§aPomyslnie ustawiono przedmiot w rece jako globalna walute dla AuctionHouse!");
+                    return true;
                 } else if (strings.length < 4 && strings[0].equals(M.getFormatted("commands.ban"))) {
                     p.sendMessage(M.getFormatted("command-feedback.ban-usage"));
                 } else if (strings.length != 2 && strings[0].equals(M.getFormatted("commands.pardon"))) {
                     p.sendMessage(M.getFormatted("command-feedback.pardon-usage"));
-                    // /ah ban player:
                 } else if (strings.length > 3 && strings[0].equals(M.getFormatted("commands.ban"))) {
                     Player targetPlayer = Bukkit.getPlayer(strings[1]);
                     if (targetPlayer==null) {
@@ -204,7 +206,6 @@ public class AuctionHouseCommand implements CommandExecutor, TabCompleter {
                             p.sendMessage(M.getFormatted("command-feedback.invalid-number3"));
                             return true;
                         }
-                        //use a StringBuilder to get all arguments
                         StringBuilder reason = new StringBuilder();
                         for (int i = 3; i < strings.length; i++) {
                             reason.append(strings[i]);
@@ -220,7 +221,6 @@ public class AuctionHouseCommand implements CommandExecutor, TabCompleter {
                     } catch (Exception e) {
                         p.sendMessage(M.getFormatted("command-feedback.invalid-number4"));
                     }
-                    // /ah pardon player:
                 } else if (strings.length == 2 && strings[0].equals(M.getFormatted("commands.pardon"))) {
                     String input = strings[1];
                     ConfigurationSection section = ConfigManager.bannedPlayers.getCustomFile().getConfigurationSection("BannedPlayers");
@@ -253,11 +253,9 @@ public class AuctionHouseCommand implements CommandExecutor, TabCompleter {
                         p.sendMessage(M.getFormatted("command-feedback.summon-usage"));
                         return true;
                     }
-                    //get the player location
                     Location loc = p.getLocation();
                     Location middleBlockLoc = new Location(loc.getWorld(), loc.getBlockX()+0.5, loc.getBlockY(), loc.getBlockZ()+0.5);
                     Location blockLoc = new Location(loc.getWorld(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
-
 
                     if(strings[1].equals(M.getFormatted("commands.npc"))) {
                         if(strings.length < 4) {
@@ -379,7 +377,6 @@ public class AuctionHouseCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
         List<String> params = new ArrayList<>();
         if(strings.length==1) {
-            //check for every item if it's half typed out, then add accordingly to the params list
             List<String> assetParams = new ArrayList<>();
             assetParams.add(M.getFormatted("commands.about"));
             assetParams.add(M.getFormatted("commands.help"));
@@ -487,6 +484,8 @@ public class AuctionHouseCommand implements CommandExecutor, TabCompleter {
         commandsList.add(M.getFormatted("commands.summon"));
         commandsList.add(M.getFormatted("commands.blacklist"));
         commandsList.add(M.getFormatted("commands.test"));
+        commandsList.add("zapiszwalute");
+        commandsList.add("zapiszitemekah");
         return commandsList;
     }
 }
